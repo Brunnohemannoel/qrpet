@@ -56,27 +56,30 @@ export default function PetPublic() {
   const fetchPetAndOwner = async () => {
     try {
       setLoading(true);
-      // Usar anon key para acessar dados públicos
-      const { data: pet, error: petError } = await supabase
+      
+      // Buscar informações do pet
+      const { data: petData, error: petError } = await supabase
         .from('pets')
         .select('*')
         .eq('id', id)
         .single();
 
       if (petError) throw petError;
+      if (!petData) throw new Error('Pet não encontrado');
       
-      if (pet) {
-        setPet(pet);
-        
-        const { data: owner, error: ownerError } = await supabase
-          .from('profiles')
-          .select('nome, telefone, endereco')
-          .eq('id', pet.user_id)
-          .single();
+      setPet(petData);
+      
+      // Buscar informações do dono
+      const { data: ownerData, error: ownerError } = await supabase
+        .from('profiles')
+        .select('nome, telefone, endereco')
+        .eq('id', petData.user_id)
+        .single();
 
-        if (ownerError) throw ownerError;
-        setOwner(owner);
-      }
+      if (ownerError) throw ownerError;
+      if (!ownerData) throw new Error('Proprietário não encontrado');
+      
+      setOwner(ownerData);
     } catch (err: any) {
       console.error('Erro ao carregar informações:', err);
       setError('Não foi possível carregar as informações do pet.');
@@ -100,7 +103,7 @@ export default function PetPublic() {
   const nextPhoto = () => {
     if (pet?.fotos_urls) {
       setCurrentPhotoIndex((prev) => 
-        prev === pet.fotos_urls.length - 1 ? 0 : prev + 1
+        prev === pet.fotos_urls!.length - 1 ? 0 : prev + 1
       );
     }
   };
@@ -108,7 +111,7 @@ export default function PetPublic() {
   const prevPhoto = () => {
     if (pet?.fotos_urls) {
       setCurrentPhotoIndex((prev) => 
-        prev === 0 ? pet.fotos_urls.length - 1 : prev - 1
+        prev === 0 ? pet.fotos_urls!.length - 1 : prev - 1
       );
     }
   };
@@ -155,7 +158,7 @@ export default function PetPublic() {
                 className="w-full h-64 object-cover"
               />
             </div>
-            {pet.fotos_urls.length > 1 && (
+            {pet.fotos_urls && pet.fotos_urls.length > 1 && (
               <>
                 <button
                   onClick={prevPhoto}
@@ -171,17 +174,19 @@ export default function PetPublic() {
                 </button>
               </>
             )}
-            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-2">
-              {pet.fotos_urls.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentPhotoIndex(index)}
-                  className={`w-2 h-2 rounded-full ${
-                    index === currentPhotoIndex ? 'bg-white' : 'bg-white/50'
-                  }`}
-                />
-              ))}
-            </div>
+            {pet.fotos_urls && pet.fotos_urls.length > 1 && (
+              <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                {pet.fotos_urls.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentPhotoIndex(index)}
+                    className={`w-2 h-2 rounded-full ${
+                      index === currentPhotoIndex ? 'bg-white' : 'bg-white/50'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="p-6">

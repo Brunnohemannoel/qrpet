@@ -105,7 +105,8 @@ export default function CadastroPet() {
         foto_url: formData.fotos_urls[0], // Primeira foto como principal
         fotos_urls: formData.fotos_urls,
         status: 'found' as const,
-        qr_code_url: `${window.location.origin}/pet/public/${user?.id}`
+        // Use relative path for qr_code_url
+        qr_code_url: `/pet/public/${user?.id}`
       };
 
       const { error } = await supabase

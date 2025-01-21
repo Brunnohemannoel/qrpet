@@ -294,9 +294,10 @@ export default function Dashboard() {
   const handleLogout = async () => {
     try {
       await signOut();
-      navigate('/'); // Redirect to landing page after logout
+      window.location.href = '/';
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
+      setError('Não foi possível fazer logout. Por favor, tente novamente.');
     }
   };
 

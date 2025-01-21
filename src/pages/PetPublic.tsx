@@ -56,6 +56,7 @@ export default function PetPublic() {
   const fetchPetAndOwner = async () => {
     try {
       setLoading(true);
+      // Usar anon key para acessar dados públicos
       const { data: pet, error: petError } = await supabase
         .from('pets')
         .select('*')
@@ -69,7 +70,7 @@ export default function PetPublic() {
         
         const { data: owner, error: ownerError } = await supabase
           .from('profiles')
-          .select('*')
+          .select('nome, telefone, endereco')
           .eq('id', pet.user_id)
           .single();
 

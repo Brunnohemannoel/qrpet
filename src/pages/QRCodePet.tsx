@@ -20,12 +20,13 @@ export default function QRCodePet() {
 
   useEffect(() => {
     if (pet) {
-      // Generate the public URL for the pet
-      const petPublicUrl = `${window.location.origin}/pet/public/${id}`;
+      // Generate the public URL for the pet using relative path
+      const petPublicUrl = `/pet/public/${id}`;
       setPublicUrl(petPublicUrl);
       
-      // Generate QR code using QR Server API
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(petPublicUrl)}`;
+      // Generate QR code using QR Server API with absolute URL
+      const absoluteUrl = `${window.location.protocol}//${window.location.host}${petPublicUrl}`;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(absoluteUrl)}`;
       setQrCodeUrl(qrUrl);
     }
   }, [pet, id]);
@@ -67,14 +68,15 @@ export default function QRCodePet() {
 
   const handleShare = async () => {
     try {
+      const absoluteUrl = `${window.location.protocol}//${window.location.host}${publicUrl}`;
       if (navigator.share) {
         await navigator.share({
           title: `QR Code do ${pet?.nome}`,
           text: `Escaneie este QR Code para ver as informações do ${pet?.nome}`,
-          url: publicUrl
+          url: absoluteUrl
         });
       } else {
-        await navigator.clipboard.writeText(publicUrl);
+        await navigator.clipboard.writeText(absoluteUrl);
         alert('Link copiado para a área de transferência!');
       }
     } catch (err) {
@@ -135,7 +137,7 @@ export default function QRCodePet() {
             <div className="w-full max-w-md">
               <h2 className="text-lg font-semibold text-gray-700 mb-2">URL Pública do Pet:</h2>
               <div className="bg-gray-50 p-3 rounded-lg break-all text-sm text-gray-600">
-                {publicUrl}
+                {`${window.location.protocol}//${window.location.host}${publicUrl}`}
               </div>
             </div>
 
